@@ -63,7 +63,6 @@ visible_len() {
 }
 
 left_parts=()
-right_parts=()
 
 has_session_name=false
 [ -n "$session_name" ] && has_session_name=true
@@ -100,31 +99,20 @@ if $has_model; then
   left_parts+=("$model_part")
 fi
 
-has_used_percentage=false
-[ -n "$used_percentage" ] && has_used_percentage=true
-if $has_used_percentage; then
-  used_int=$(printf '%.0f' "$used_percentage")
-  bar_total=10
-  filled=$(( used_int * bar_total / 100 ))
-  empty=$(( bar_total - filled ))
-  bar=""
-  for i in $(seq 1 $filled); do bar="${bar}█"; done
-  for i in $(seq 1 $empty); do bar="${bar}░"; done
-  right_parts+=("[${bar}] ${used_int}%")
-fi
-
+# Build right suffix (cost + rate) — bar is calculated separately
+cost_str=""
 has_cost_usd=false
 [ -n "$cost_usd" ] && has_cost_usd=true
 if $has_cost_usd; then
-  cost_formatted=$(printf '| $%.2f' "$cost_usd")
-  right_parts+=("$cost_formatted")
+  cost_str=$(printf '| $%.2f' "$cost_usd")
 fi
 
+rate_str=""
 has_five_hour_used=false
 [ -n "$five_hour_used" ] && has_five_hour_used=true
 if $has_five_hour_used; then
   five_hour_int=$(printf '%.0f' "$five_hour_used")
-  rate_part="| 5h ${five_hour_int}%"
+  rate_str="| 5h ${five_hour_int}%"
   has_resets_at=false
   [ -n "$five_hour_resets_at" ] && has_resets_at=true
   if $has_resets_at; then
@@ -134,17 +122,59 @@ if $has_five_hour_used; then
     has_resets_time=false
     [ -n "$resets_time" ] && has_resets_time=true
     if $has_resets_time; then
-      rate_part="$rate_part resets ${resets_time}"
+      rate_str="$rate_str resets ${resets_time}"
     fi
   fi
-  right_parts+=("$rate_part")
 fi
 
-left_str="${left_parts[*]}"
-right_str="${right_parts[*]}"
+right_suffix_parts=()
+[ -n "$cost_str" ] && right_suffix_parts+=("$cost_str")
+[ -n "$rate_str" ] && right_suffix_parts+=("$rate_str")
+right_suffix="${right_suffix_parts[*]}"
 
+# Layout calculation
+left_str="${left_parts[*]}"
 terminal_width=$(( ${COLUMNS:-$(tput cols 2>/dev/null || echo 80)} - 2 ))
 left_len=$(visible_len "$left_str")
+right_suffix_len=$(visible_len "$right_suffix")
+
+has_right_suffix=false
+[ -n "$right_suffix" ] && has_right_suffix=true
+suffix_sep=0
+$has_right_suffix && suffix_sep=1
+
+# Responsive bar: 7 = "[" + "] " + "100%" (max 4 digits+%)
+bar_min=5
+bar_max=20
+bar_overhead=7
+bar_total=$(( terminal_width - left_len - right_suffix_len - suffix_sep - bar_overhead ))
+[ "$bar_total" -gt "$bar_max" ] && bar_total=$bar_max
+[ "$bar_total" -lt "$bar_min" ] && bar_total=$bar_min
+
+# Build progress bar
+bar_str=""
+has_used_percentage=false
+[ -n "$used_percentage" ] && has_used_percentage=true
+if $has_used_percentage; then
+  used_int=$(printf '%.0f' "$used_percentage")
+  filled=$(( used_int * bar_total / 100 ))
+  empty=$(( bar_total - filled ))
+  bar=""
+  for i in $(seq 1 $filled); do bar="${bar}█"; done
+  for i in $(seq 1 $empty); do bar="${bar}░"; done
+  bar_str="[${bar}] ${used_int}%"
+fi
+
+# Assemble right_str
+if [ -n "$bar_str" ] && $has_right_suffix; then
+  right_str="${bar_str} ${right_suffix}"
+elif [ -n "$bar_str" ]; then
+  right_str="$bar_str"
+elif $has_right_suffix; then
+  right_str="$right_suffix"
+else
+  right_str=""
+fi
 
 try_print() {
   local right="$1"
