@@ -59,7 +59,9 @@ if $has_effort_level; then
 fi
 
 visible_len() {
-  printf '%s' "$1" | sed $'s/\033\[[0-9;]*m//g' | sed 's/[█░]/x/g' | LC_ALL=C awk '{ print length }'
+  local stripped
+  stripped=$(printf '%s' "$1" | sed $'s/\033\[[0-9;]*m//g' | sed 's/[█░]/x/g')
+  echo "${#stripped}"
 }
 
 left_parts=()
@@ -134,7 +136,7 @@ right_suffix="${right_suffix_parts[*]}"
 
 # Layout calculation
 left_str="${left_parts[*]}"
-terminal_width=$(( ${COLUMNS:-$(tput cols 2>/dev/null || echo 80)} - 2 ))
+terminal_width=$(( ${COLUMNS:-$(tput cols 2>/dev/null || echo 80)} - 4 ))
 left_len=$(visible_len "$left_str")
 right_suffix_len=$(visible_len "$right_suffix")
 
@@ -182,7 +184,7 @@ try_print() {
   right_len=$(visible_len "$right")
   local pad=$(( terminal_width - left_len - right_len ))
   local is_positive=false
-  [ "$pad" -gt 0 ] && is_positive=true
+  [ "$pad" -ge 0 ] && is_positive=true
   if $is_positive; then
     printf '%s%*s%s' "$left_str" "$pad" "" "$right"
     return 0
