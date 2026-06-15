@@ -55,7 +55,9 @@ if $has_effort_level; then
 fi
 
 visible_len() {
-  printf '%s' "$1" | sed $'s/\033\[[0-9;]*m//g' | python3 -c "import sys; print(len(sys.stdin.read().rstrip('\n')))"
+  local stripped
+  stripped=$(printf '%s' "$1" | sed $'s/\033\[[0-9;]*m//g')
+  echo "${#stripped}"
 }
 
 left_parts=()
@@ -104,8 +106,8 @@ if $has_used_percentage; then
   filled=$(( used_int * bar_total / 100 ))
   empty=$(( bar_total - filled ))
   bar=""
-  for i in $(seq 1 $filled); do bar="${bar}█"; done
-  for i in $(seq 1 $empty); do bar="${bar}░"; done
+  for i in $(seq 1 $filled); do bar="${bar}="; done
+  for i in $(seq 1 $empty); do bar="${bar}-"; done
   right_parts+=("[${bar}] ${used_int}%")
 fi
 
@@ -139,7 +141,7 @@ fi
 left_str="${left_parts[*]}"
 right_str="${right_parts[*]}"
 
-terminal_width=$(( ${COLUMNS:-$(tput cols 2>/dev/null || echo 80)} - 1 ))
+terminal_width="${COLUMNS:-$(tput cols 2>/dev/null || echo 80)}"
 left_len=$(visible_len "$left_str")
 right_len=$(visible_len "$right_str")
 padding=$(( terminal_width - left_len - right_len ))
