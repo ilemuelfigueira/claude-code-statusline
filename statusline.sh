@@ -141,7 +141,7 @@ fi
 left_str="${left_parts[*]}"
 right_str="${right_parts[*]}"
 
-terminal_width="${COLUMNS:-80}"
+terminal_width="${COLUMNS:-$(tput cols 2>/dev/null || echo 200)}"
 left_len=$(visible_len "$left_str")
 right_len=$(visible_len "$right_str")
 padding=$(( terminal_width - left_len - right_len ))
