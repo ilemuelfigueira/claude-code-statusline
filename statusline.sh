@@ -55,9 +55,7 @@ if $has_effort_level; then
 fi
 
 visible_len() {
-  local stripped
-  stripped=$(printf '%s' "$1" | sed $'s/\033\[[0-9;]*m//g')
-  printf '%s' "$stripped" | wc -m | tr -d ' \n'
+  printf '%s' "$1" | sed $'s/\033\[[0-9;]*m//g' | python3 -c "import sys; print(len(sys.stdin.read().rstrip('\n')))"
 }
 
 left_parts=()
@@ -141,7 +139,7 @@ fi
 left_str="${left_parts[*]}"
 right_str="${right_parts[*]}"
 
-terminal_width="${COLUMNS:-$(tput cols 2>/dev/null || echo 80)}"
+terminal_width=$(( ${COLUMNS:-$(tput cols 2>/dev/null || echo 80)} - 1 ))
 left_len=$(visible_len "$left_str")
 right_len=$(visible_len "$right_str")
 padding=$(( terminal_width - left_len - right_len ))
