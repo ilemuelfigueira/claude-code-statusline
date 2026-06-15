@@ -56,7 +56,7 @@ fi
 
 visible_len() {
   local stripped
-  stripped=$(printf '%s' "$1" | sed $'s/\033\[[0-9;]*m//g')
+  stripped=$(printf '%s' "$1" | sed $'s/\033\[[0-9;]*m//g' | sed 's/[█░]/xx/g')
   printf '%s' "$stripped" | wc -m | tr -d ' \n'
 }
 
@@ -141,7 +141,7 @@ fi
 left_str="${left_parts[*]}"
 right_str="${right_parts[*]}"
 
-terminal_width="${COLUMNS:-$(tput cols 2>/dev/null || echo 200)}"
+terminal_width="${COLUMNS:-$(tput cols 2>/dev/null || echo 80)}"
 left_len=$(visible_len "$left_str")
 right_len=$(visible_len "$right_str")
 padding=$(( terminal_width - left_len - right_len ))
