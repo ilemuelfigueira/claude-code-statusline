@@ -145,13 +145,30 @@ right_str="${right_parts[*]}"
 
 terminal_width=$(( ${COLUMNS:-$(tput cols 2>/dev/null || echo 80)} - 2 ))
 left_len=$(visible_len "$left_str")
-right_len=$(visible_len "$right_str")
-padding=$(( terminal_width - left_len - right_len ))
-is_padding_positive=false
-[ "$padding" -gt 0 ] && is_padding_positive=true
 
-if $is_padding_positive; then
-  printf '%s%*s%s' "$left_str" "$padding" "" "$right_str"
+try_print() {
+  local right="$1"
+  local right_len
+  right_len=$(visible_len "$right")
+  local pad=$(( terminal_width - left_len - right_len ))
+  local is_positive=false
+  [ "$pad" -gt 0 ] && is_positive=true
+  if $is_positive; then
+    printf '%s%*s%s' "$left_str" "$pad" "" "$right"
+    return 0
+  fi
+  return 1
+}
+
+right_no_resets=$(printf '%s' "$right_str" | sed 's/ resets [^ ]*//')
+right_no_cost=$(printf '%s' "$right_no_resets" | sed 's/ | \$[0-9,.]*//')
+
+if try_print "$right_str"; then
+  :
+elif try_print "$right_no_resets"; then
+  :
+elif try_print "$right_no_cost"; then
+  :
 else
-  printf '%s %s' "$left_str" "$right_str"
+  printf '%s %s' "$left_str" "$right_no_cost"
 fi

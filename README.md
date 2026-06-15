@@ -5,7 +5,7 @@ A custom status line script for [Claude Code](https://code.claude.com) with colo
 ## What it shows
 
 ```
-lemuelfigueira @ myrepo on feat/auth | Claude Sonnet 4.6 [high]       [████░░░░░░] 30% | $1.00 | 5h 4%
+lemuelfigueira @ myrepo on feat/auth | Claude Sonnet 4.6 [high]       [======----] 30% | $1.00 | 5h 4%
 ```
 
 - **Owner @ repo** (purple/blue) or current directory (purple) when outside a git repo
@@ -14,12 +14,14 @@ lemuelfigueira @ myrepo on feat/auth | Claude Sonnet 4.6 [high]       [███
 - **Context progress bar** right-aligned to terminal width
 - **Session cost** in USD
 - **5-hour rate limit** usage with reset time
+- Automatically drops `resets TIME` → cost → when terminal is too narrow to fit everything
 
 ## Requirements
 
 - `bash`
 - `jq`
 - `git`
+- **Claude Code v2.1.153+** — required for full visual fidelity. Older versions may be missing fields such as `effort.level`, `session_name`, `cost`, and `rate_limits` in the status line JSON, and do not inject the `COLUMNS` variable needed for correct right-alignment.
 
 ## Installation
 
