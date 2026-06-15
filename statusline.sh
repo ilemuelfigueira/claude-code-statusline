@@ -56,7 +56,7 @@ fi
 
 visible_len() {
   local stripped
-  stripped=$(printf '%s' "$1" | sed $'s/\033\[[0-9;]*m//g' | sed 's/[█░]/xx/g')
+  stripped=$(printf '%s' "$1" | sed $'s/\033\[[0-9;]*m//g')
   printf '%s' "$stripped" | wc -m | tr -d ' \n'
 }
 
