@@ -12,12 +12,6 @@ git_branch=$(git -C "$cwd" symbolic-ref --short HEAD 2>/dev/null || git -C "$cwd
 repo_owner=$(echo "$input" | jq -r '.workspace.repo.owner // empty')
 repo_name=$(echo "$input" | jq -r '.workspace.repo.name // empty')
 session_name=$(echo "$input" | jq -r '.session_name // empty')
-label_file="$HOME/.claude/.session-label"
-has_session_name_json=false
-[ -n "$session_name" ] && has_session_name_json=true
-if ! $has_session_name_json && [ -f "$label_file" ]; then
-  session_name=$(cat "$label_file")
-fi
 effort_level=$(echo "$input" | jq -r '.effort.level // empty')
 cost_usd=$(echo "$input" | jq -r '.cost.total_cost_usd // empty')
 five_hour_used=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // empty')
