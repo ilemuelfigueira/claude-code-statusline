@@ -5,7 +5,7 @@ A custom status line script for [Claude Code](https://code.claude.com) with colo
 ## What it shows
 
 ```
-lemuelfigueira @ myrepo on feat/auth | Claude Sonnet 4.6 [high]       [======----] 30% | $1.00 | 5h 4%
+lemuelfigueira @ myrepo on feat/auth | Claude Sonnet 4.6 [high]       [████░░░░░░] 30% | $1.00 | 5h 4%
 ```
 
 - **Owner @ repo** (purple/blue) or current directory (purple) when outside a git repo

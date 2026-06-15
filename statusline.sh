@@ -59,7 +59,7 @@ if $has_effort_level; then
 fi
 
 visible_len() {
-  printf '%s' "$1" | sed $'s/\033\[[0-9;]*m//g' | LC_ALL=C awk '{ print length }'
+  printf '%s' "$1" | sed $'s/\033\[[0-9;]*m//g' | sed 's/[█░]/x/g' | LC_ALL=C awk '{ print length }'
 }
 
 left_parts=()
@@ -108,8 +108,8 @@ if $has_used_percentage; then
   filled=$(( used_int * bar_total / 100 ))
   empty=$(( bar_total - filled ))
   bar=""
-  for i in $(seq 1 $filled); do bar="${bar}="; done
-  for i in $(seq 1 $empty); do bar="${bar}-"; done
+  for i in $(seq 1 $filled); do bar="${bar}█"; done
+  for i in $(seq 1 $empty); do bar="${bar}░"; done
   right_parts+=("[${bar}] ${used_int}%")
 fi
 
