@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+if ! command -v jq &>/dev/null; then
+  printf 'statusline: jq not found — install with: brew install jq'
+  exit 0
+fi
 input=$(cat)
 
 cwd=$(echo "$input" | jq -r '.cwd // .workspace.current_dir // empty')
@@ -55,9 +59,7 @@ if $has_effort_level; then
 fi
 
 visible_len() {
-  local stripped
-  stripped=$(printf '%s' "$1" | sed $'s/\033\[[0-9;]*m//g')
-  echo "${#stripped}"
+  printf '%s' "$1" | sed $'s/\033\[[0-9;]*m//g' | LC_ALL=C awk '{ print length }'
 }
 
 left_parts=()
@@ -141,7 +143,7 @@ fi
 left_str="${left_parts[*]}"
 right_str="${right_parts[*]}"
 
-terminal_width="${COLUMNS:-$(tput cols 2>/dev/null || echo 80)}"
+terminal_width=$(( ${COLUMNS:-$(tput cols 2>/dev/null || echo 80)} - 2 ))
 left_len=$(visible_len "$left_str")
 right_len=$(visible_len "$right_str")
 padding=$(( terminal_width - left_len - right_len ))
